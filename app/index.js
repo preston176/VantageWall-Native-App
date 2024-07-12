@@ -1,9 +1,11 @@
-import { StyleSheet, Text, View, Image } from 'react-native'
+import { StyleSheet, Text, View, Image, Pressable } from 'react-native'
 import React from 'react'
 import { StatusBar } from 'expo-status-bar'
 import { hp, wp } from '../helpers/common'
 import { LinearGradient } from 'expo-linear-gradient'
-import Animated, { FadeInRight, FadeInUp } from 'react-native-reanimated'
+import Animated, { FadeIn, FadeInDown, FadeInRight, FadeInUp } from 'react-native-reanimated'
+import { theme } from './../constants/theme';
+
 
 
 const WelcomeScreen = () => {
@@ -16,15 +18,36 @@ const WelcomeScreen = () => {
                 resizeMode='cover'
             />
             {/* background gradient */}
-            <Animated.View entering={FadeInUp.duration(900)} style={{ flex: 1 }}>
+            <Animated.View entering={FadeInDown.duration(700)} style={{ flex: 1 }}>
                 <LinearGradient
                     colors={['rgba(255,255,255,0)', 'rgba(255,255,255,0.5)', 'white', 'white']}
                     style={styles.gradient}
                     start={{ x: 0.5, y: 0.2 }}
-                    end={{ x: 0.5, y: 0.8 }}
+                    end={{ x: 0.5, y: 1 }}
                 />
+
+                {/* end of background gradient */}
+                {/* Start of Welcome screen Content */}
+                <View style={styles.contentContainer}>
+                    <Animated.Text
+                        entering={FadeInDown.delay(500).springify()}
+                        style={styles.title}>
+                        WalliFy
+                    </Animated.Text>
+                    <Animated.Text
+                        entering={FadeInDown.delay(500).springify()}
+                        style={styles.punchLine}>
+                        Define Your WallPaper
+                    </Animated.Text>
+                    <Animated.View
+                        entering={FadeInDown.delay(500)}>
+                        <Pressable style={styles.startButton}>
+                            <Text style={styles.startText}>Get Started</Text>
+                        </Pressable>
+                    </Animated.View>
+                </View>
+                {/* End of Welcome screen Content */}
             </Animated.View>
-            {/* end of background gradient */}
         </View>
     )
 }
@@ -43,6 +66,38 @@ const styles = StyleSheet.create({
         height: hp(65),
         bottom: 0,
         position: 'absolute'
+    },
+    contentContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "flex-end",
+        gap: 16
+
+    },
+    title: {
+        fontSize: hp(8),
+        color: theme.colors.neutral(0.9),
+        fontWeight: theme.fontWeights.bold
+    },
+    punchLine: {
+        fontSize: hp(2),
+        letterSpacing: 1,
+        marginBottom: 10,
+        fontWeight: theme.fontWeights.medium
+    },
+    startButton: {
+        marginBottom: 50,
+        backgroundColor: theme.colors.neutral(0.9),
+        padding: 15,
+        paddingHorizontal: 90,
+        borderRadius: theme.radius.xl,
+        borderCurve: 'continuous'
+    },
+    startText: {
+        color: theme.colors.white,
+        fontSize: hp(3),
+        fontWeight: theme.fontWeights.medium,
+        letterSpacing: 2
     }
 })
 
