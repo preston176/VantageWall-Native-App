@@ -3,12 +3,16 @@ import React from 'react'
 import { StatusBar } from 'expo-status-bar'
 import { hp, wp } from '../helpers/common'
 import { LinearGradient } from 'expo-linear-gradient'
-import Animated, { FadeIn, FadeInDown, FadeInRight, FadeInUp } from 'react-native-reanimated'
+import Animated, { FadeInDown } from 'react-native-reanimated'
 import { theme } from './../constants/theme';
+import { useRouter } from "expo-router"
 
 
 
 const WelcomeScreen = () => {
+    const router = useRouter();
+
+
     return (
         <View style={styles.container}>
             <StatusBar style='light' />
@@ -41,7 +45,7 @@ const WelcomeScreen = () => {
                     </Animated.Text>
                     <Animated.View
                         entering={FadeInDown.delay(500)}>
-                        <Pressable style={styles.startButton}>
+                        <Pressable onPress={() => router.push('home')} style={styles.startButton}>
                             <Text style={styles.startText}>Get Started</Text>
                         </Pressable>
                     </Animated.View>
