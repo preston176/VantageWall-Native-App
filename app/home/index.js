@@ -1,15 +1,29 @@
 import { View, Text, Pressable, ScrollView, TextInput } from 'react-native'
-import React from 'react'
+import React, { useRef, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Feather, FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { theme } from '../../constants/theme';
 import { StyleSheet } from 'react-native-web';
 import { hp, wp } from '../../helpers/common';
+import Categories from '../../components/categories';
 
 const HomeScreen = () => {
     // initialize a destructured top to get safearea view based on mobile platform; android or iOS
     const { top } = useSafeAreaInsets();
     const paddingTop = top > 0 ? top + 10 : 30;
+    // states
+    const [search, setSearch] = useState('');
+    const [activeCategory, setActiveCategory] = useState(null);
+    // reference
+    const searchInputRef = useRef(null);
+    // function to clear text
+    const handleClear = () => {
+        setSearch('');
+    }
+
+    const handleChangeCategory = (category) => {
+        setActiveCategory(category)
+    }
     return (
         <View style={[styles.container, { paddingTop }]}>
             {/* header start */}
@@ -32,11 +46,27 @@ const HomeScreen = () => {
                     </View>
                     <TextInput
                         placeholder="Type to Search ..."
-                        style={styles.searchInput} />
-                    <Pressable
-                        style={styles.closeIcon}>
-                        <Ionicons name='close' size={24} color={theme.colors.neutral(0.6)} />
-                    </Pressable>
+                        style={styles.searchInput}
+                        ref={searchInputRef}
+                        value={search}
+                        onChange={value => setSearch(value)}
+                    />
+                    {/* conditionally render the close button */}
+                    {
+                        search && (
+                            <Pressable
+                                onPress={handleClear}
+                                style={styles.closeIcon}>
+                                <Ionicons name='close' size={24} color={theme.colors.neutral(0.6)} />
+                            </Pressable>
+                        )
+                    }
+
+                </View>
+                {/* end of search bar */}
+                {/* categories section */}
+                <View style={styles.categories}>
+                    <Categories activeCategory={activeCategory} handleChangeCategory={handleChangeCategory} />
                 </View>
             </ScrollView>
         </View>
@@ -46,7 +76,8 @@ const HomeScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        gap: 15
+        gap: 15,
+        backgroundColor: "transparent"
     },
     header: {
         marginHorizontal: wp(4),
@@ -57,7 +88,8 @@ const styles = StyleSheet.create({
     title: {
         fontSize: hp(4),
         fontWeight: theme.fontWeights.semibold,
-        color: theme.colors.neutral(0.9)
+        color: theme.colors.neutral(0.9),
+        backgroundColor: theme.colors.neutral(0)
     },
     searchBar: {
         marginHorizontal: wp(4),
@@ -78,6 +110,12 @@ const styles = StyleSheet.create({
         fontSize: hp(1.8),
         marginLeft: 10
     },
+    closeIcon: {
+        backgroundColor: theme.colors.neutral(0.2),
+        padding: 8,
+        borderRadius: theme.radius.sm
+    },
+    categories: {},
 })
 
 export default HomeScreen
