@@ -1,11 +1,13 @@
 import { View, Text, Pressable, ScrollView, TextInput } from 'react-native'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Feather, FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { theme } from '../../constants/theme';
 import { StyleSheet } from 'react-native-web';
 import { hp, wp } from '../../helpers/common';
 import Categories from '../../components/categories';
+import { apiCall } from '../../api';
+import ImageGrid from './../../components/imageGrid';
 
 const HomeScreen = () => {
     // initialize a destructured top to get safearea view based on mobile platform; android or iOS
@@ -13,6 +15,7 @@ const HomeScreen = () => {
     const paddingTop = top > 0 ? top + 10 : 30;
     // states
     const [search, setSearch] = useState('');
+    const [images, setImages] = useState([]);
     const [activeCategory, setActiveCategory] = useState(null);
     // reference
     const searchInputRef = useRef(null);
@@ -20,10 +23,30 @@ const HomeScreen = () => {
     const handleClear = () => {
         setSearch('');
     }
+    useEffect(() => {
+        // fetch images
+        fetchImages();
+    }, []);
+    const fetchImages = async (parameters = { page: 1 }, append = false) => {
+        let res = await apiCall(parameters);
+        console.log('result got', res.data)
+        if (res.success && res?.data) {
+            const fetchedImages = res?.data.map(image => image);
+            if (append) {
+                setImages([...images, ...fetchedImages]);
+            } else {
+                setImages([...fetchedImages]);
+            }
+        }
+    }
+    
+    
+
 
     const handleChangeCategory = (category) => {
         setActiveCategory(category)
     }
+
     return (
         <View style={[styles.container, { paddingTop }]}>
             {/* header start */}
@@ -67,6 +90,13 @@ const HomeScreen = () => {
                 {/* categories section */}
                 <View style={styles.categories}>
                     <Categories activeCategory={activeCategory} handleChangeCategory={handleChangeCategory} />
+                </View>
+
+                {/*  Images grid*/}
+                <View>
+                    {
+                        images.length > 0 && <ImageGrid images={images} />
+                    }
                 </View>
             </ScrollView>
         </View>
