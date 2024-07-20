@@ -1,9 +1,15 @@
 import { Text, Pressable, StyleSheet } from 'react-native'
 import React from 'react'
 import { Image } from 'expo-image'
-import { getImageSize } from '../helpers/common'
+import { getImageSize, wp } from '../helpers/common'
+import { theme } from '../constants/theme'
 
-const ImageCard = ({ item, index }) => {
+const ImageCard = ({ item, index, columns }) => {
+
+    const isLastInRow = () => {
+        return (index + 1) % columns === 0;
+    }
+
     // console.log(item)
     // function to get image height
     const getImageHeight = () => {
@@ -11,7 +17,7 @@ const ImageCard = ({ item, index }) => {
         return { height: getImageSize(height, width) }
     }
     return (
-        <Pressable>
+        <Pressable style={[styles.imageWrapper, !isLastInRow() && styles.spacing]}>
             <Image style={[styles.image, getImageHeight()]} source={item.urls.small}
                 placeholder={item.blur_hash}
                 contentFit='cover'
@@ -26,6 +32,16 @@ const styles = StyleSheet.create({
         height: 300,
         width: '100%'
     },
+    imageWrapper: {
+        backgroundColor: theme.colors.grayBG,
+        borderRadius: theme.radius.xl,
+        borderCurve: "continuous",
+        overflow: "hidden",
+        marginBottom: wp(2)
+    },
+    spacing: {
+        marginRight: wp(2)
+    }
 })
 
 export default ImageCard

@@ -42,3 +42,19 @@ export const getColumnCount = () => {
         return 2
     }
 }
+
+export const getImageSize = (height, width) => {
+    if (width > height) {
+        // this is landscape image
+        return 250;
+    }
+    else if (width < height) {
+        {
+            // this is portrait image
+            return 300
+        }
+    }
+    else {
+        return 200;
+    }
+}
