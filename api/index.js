@@ -11,7 +11,7 @@ const formattedUrl = (parameters) => {
     if (!parameters) return url;
     let paramKeys = Object.keys(parameters);
     paramKeys.map((key) => {
-        let value = key == 'q' ? encodeURIComponent(parameters[key]) : parameters[key];
+        let value = key == 'query' ? encodeURIComponent(parameters[key]) : parameters[key];
         url += `&${key}=${value}`
     });
     // console.log(('final url: ', url))
@@ -23,7 +23,7 @@ const formattedSearchUrl = (parameters) => {
     if (!parameters) return url;
     let paramKeys = Object.keys(parameters);
     paramKeys.map((key) => {
-        let value = key == 'q' ? encodeURIComponent(parameters[key]) : parameters[key];
+        let value = key == 'query' ? encodeURIComponent(parameters[key]) : parameters[key];
         url += `&${key}=${value}`
     });
     // console.log(('final url: ', url))
