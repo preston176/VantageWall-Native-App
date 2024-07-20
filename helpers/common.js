@@ -21,3 +21,24 @@ export const hp = percentage => {
     const height = deviceHeight;
     return (percentage * height) / 100;
 }
+
+
+/**
+ * The function `getColumnCount` returns the number of columns based on the device width.
+ * @returns The function `getColumnCount` returns the number of columns based on the device width. If
+ * the device width is greater than or equal to 1024, it returns 4 (for desktop). If the device width
+ * is between 768 and 1023, it returns 3 (for tablet screen). Otherwise, if the device width is less
+ * than 768, it returns 2 (for phone
+ */
+export const getColumnCount = () => {
+    if (deviceWidth >= 1024) {
+        // desktop
+        return 4;
+    } else if (deviceWidth >= 768) {
+        // tablet screen
+        return 3;
+    } else {
+        // phone
+        return 2
+    }
+}
