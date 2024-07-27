@@ -36,7 +36,7 @@ const WelcomeScreen = () => {
                     <Animated.Text
                         entering={FadeInDown.delay(500).springify()}
                         style={styles.title}>
-                        WalliFy
+                        VantageWall
                     </Animated.Text>
                     <Animated.Text
                         entering={FadeInDown.delay(500).springify()}
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
 
     },
     title: {
-        fontSize: hp(8),
+        fontSize: hp(6),
         color: theme.colors.neutral(0.9),
         fontWeight: theme.fontWeights.bold
     },

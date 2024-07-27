@@ -1,6 +1,6 @@
-import { View, Text, Pressable, ScrollView, TextInput } from 'react-native'
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { View, Text, Pressable, ScrollView, TextInput } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather, FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { theme } from '../../constants/theme';
 import { StyleSheet } from 'react-native-web';
@@ -8,135 +8,112 @@ import { hp, wp } from '../../helpers/common';
 import Categories from '../../components/categories';
 import { apiCall, apiSearchCall } from '../../api';
 import ImageGrid from './../../components/imageGrid';
-import { debounce } from 'lodash';
+import FiltersModal from '../../components/filtersModal';
 
 const HomeScreen = () => {
-    // initialize a destructured top to get safearea view based on mobile platform; android or iOS
     const { top } = useSafeAreaInsets();
     const paddingTop = top > 0 ? top + 10 : 30;
-    // states
+
     const [search, setSearch] = useState('');
-    const [isSearching, setIsSearching] = useState(false)
+    const [isSearching, setIsSearching] = useState(false);
     const [images, setImages] = useState([]);
+    const [filters, setFilters] = useState(null);
     const [activeCategory, setActiveCategory] = useState(null);
-    // reference
+    const [page, setPage] = useState(1);
+    const modalRef = useRef(null);
+
     const searchInputRef = useRef(null);
-    // function to clear text
+
     const handleClear = () => {
         setSearch('');
         setIsSearching(false);
         searchInputRef?.current.clear();
-    }
+    };
+
     useEffect(() => {
-        // fetch images
         fetchImages();
-    }, [search]);
+    }, []);
+
     const fetchImages = async (parameters = { page: 1 }, append = false) => {
-        // console.log(parameters, isSearching)
-        if (isSearching === false) {
+        try {
+            let res;
+            if (isSearching) {
+                res = await apiSearchCall(parameters);
+            } else {
+                res = await apiCall(parameters);
+            }
 
-            let res = await apiCall(parameters);
-            // console.log('result got', res.data)
             if (res.success && res?.data) {
-                const fetchedImages = res?.data.map(image => image);
-                if (append) {
-                    setImages([...images, ...fetchedImages]);
-                } else {
-                    setImages([...fetchedImages]);
-                }
+                const fetchedImages = isSearching ? res.data.results : res.data;
+                setImages(append ? [...images, ...fetchedImages] : fetchedImages);
             }
-            return;
-        } else {
-            if (isSearching === true) {
-                let res = await apiSearchCall(parameters);
-                // console.log('result got', res.data);
-
-                if (res.success && res?.data) {
-                    // Extract the results array from the response
-                    const fetchedImages = res.data.results.map(image => image);
-
-                    if (append) {
-                        setImages([...images, ...fetchedImages]);
-                    } else {
-                        setImages([...fetchedImages]);
-                    }
-                }
-                return;
-            }
+        } catch (error) {
+            console.error('Failed to fetch images:', error);
         }
+    };
+
+    const openFiltersModal = () => {
+        modalRef?.current?.present();
     }
 
+    const closeFiltersModal = () => {
+        modalRef?.current?.close();
+    }
+    const applyFilters = () => {
+        console.log("applying filters")
+        closeFiltersModal()
 
+    }
 
+    const resetFilters = () => {
+        console.log("resestting filters");
+        setFilters(null)
+        closeFiltersModal()
+    }
 
     const handleChangeCategory = (category) => {
         return new Promise((resolve, reject) => {
-            // Update state
             setActiveCategory(category);
             handleClear();
             setIsSearching(true);
             setSearch(category);
             setImages([]);
+            setPage(1);
 
-            // Initialize page and parameters
-            let page = 1;
-            let parameters = {
-                page,
-                query: category,
-            };
-
-            // Fetch images with the specified parameters
-            fetchImages(parameters, false)
-                .then(() => {
-                    resolve();  // Resolve the promise when fetchImages completes
-                })
-                .catch((error) => {
-                    reject(error);  // Reject the promise if there is an error
-                });
+            fetchImages({ page: 1, query: category }, false)
+                .then(() => resolve())
+                .catch((error) => reject(error));
         });
     };
 
-
-    const handleSearch = (text) => {
-        setSearch(text);
-        if (text.length > 2) {
-            // enable searching state
+    const handleSearch = () => {
+        if (search.length > 2) {
             setIsSearching(true);
-            // then search this text
-            page = 1;
+            setPage(1);
             setImages([]);
             setActiveCategory(null);
-            fetchImages({ page, query: text }, false)
-
-
-        }
-        if (text === "") {
-            // reset the search results
-            setIsSearching(false)
-            page = 1;
+            fetchImages({ page: 1, query: search }, false);
+        } else if (search === "") {
+            setIsSearching(false);
+            setPage(1);
             setImages([]);
-            fetchImages({ page }, false);
+            fetchImages({ page: 1 }, false);
         }
-    }
-
-    const handleTextDebounce = useCallback(debounce(handleSearch, 400), [])
+    };
 
     return (
         <View style={[styles.container, { paddingTop }]}>
-            {/* header start */}
             <View style={styles.header}>
                 <Pressable>
                     <Text style={styles.title}>
-                        WalliFy
+                        VantageWall
                     </Text>
                 </Pressable>
-                <Pressable>
+                <Pressable onPress={openFiltersModal}>
                     <FontAwesome6 name="bars-staggered" size={22} color={theme.colors.neutral(0.9)} />
                 </Pressable>
             </View>
-            {/* header end */}
             <ScrollView contentContainerStyle={{ gap: 15 }}>
-                {/* Search bar */}
                 <View style={styles.searchBar}>
                     <View style={styles.searchIcon}>
                         <Feather name="search" size={24} color={theme.colors.neutral(0.4)} />
@@ -145,36 +122,48 @@ const HomeScreen = () => {
                         placeholder="Type to Search ..."
                         style={styles.searchInput}
                         ref={searchInputRef}
-                        // value={search}
-                        onChangeText={handleTextDebounce}
+                        value={search}
+                        onChangeText={setSearch}
+                        onSubmitEditing={handleSearch}
                     />
-                    {/* conditionally render the close button */}
-                    {
-                        search && (
-                            <Pressable
-                                onPress={handleClear}
-                                style={styles.closeIcon}>
-                                <Ionicons name='close' size={24} color={theme.colors.neutral(0.6)} />
-                            </Pressable>
-                        )
-                    }
+                    {/* search button */}
+                    {search ? (
+                        <Pressable
+                            onPress={handleSearch}
+                            style={styles.closeIcon}>
+                            <Ionicons
+                                name='search-outline'
+                                size={24}
+                                color={theme.colors.neutral(0.6)}
+                            />
+                        </Pressable>
 
+                    ) : (
+                        <Pressable
+                            onPress={handleClear}
+                            style={styles.closeIcon}>
+                            <Ionicons name='close' size={24} color={theme.colors.neutral(0.6)} />
+                        </Pressable>
+                    )}
+                    {/* search button */}
                 </View>
-                {/* end of search bar */}
-                {/* categories section */}
                 <View style={styles.categories}>
                     <Categories activeCategory={activeCategory} handleChangeCategory={handleChangeCategory} />
                 </View>
-
-                {/*  Images grid*/}
                 <View>
-                    {
-                        images.length > 0 && <ImageGrid images={images} />
-                    }
+                    {images.length > 0 && <ImageGrid images={images} />}
                 </View>
             </ScrollView>
+            {/* filters modal */}
+            <FiltersModal modalRef={modalRef}
+                filters={filters}
+                setFilters={setFilters}
+                onClose={closeFiltersModal}
+                onApply={applyFilters}
+                onReset={resetFilters}
+            />
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -220,6 +209,6 @@ const styles = StyleSheet.create({
         borderRadius: theme.radius.sm
     },
     categories: {},
-})
+});
 
-export default HomeScreen
+export default HomeScreen;

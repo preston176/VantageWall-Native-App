@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Pressable } from 'react-native';
 import React, { useMemo } from 'react';
 import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { BlurView } from 'expo-blur';
@@ -6,9 +6,16 @@ import { hp } from '../helpers/common';
 import { theme } from '../constants/theme';
 import { data } from '../constants/data';
 import { capitalize } from 'lodash';
-import { SectionView, CommonFilterRow } from './filterViews';
+import { SectionView, CommonFilterRow, ColorFilter } from './filterViews';
 
-const FiltersModal = ({ modalRef }) => {
+const FiltersModal = ({
+    modalRef,
+    onClose,
+    onReset,
+    onApply,
+    filters,
+    setFilters
+}) => {
     const snapPoints = useMemo(() => ['75%'], []);
 
     return (
@@ -22,7 +29,8 @@ const FiltersModal = ({ modalRef }) => {
             <BottomSheetView style={styles.contentContainer}>
                 <View style={styles.content}>
                     <Text style={styles.filterText}>Filters</Text>
-                    {Object.keys(sections).map((sectionName) => {
+                    {Object.keys(sections).map((sectionName, index) => {
+
                         const SectionViewComponent = sections[sectionName];
                         let sectionData = data.filters[sectionName]
                         let title = capitalize(sectionName)
@@ -30,11 +38,26 @@ const FiltersModal = ({ modalRef }) => {
                             <View key={sectionName}>
                                 <SectionView
                                     title={title}
-                                    content={SectionViewComponent({ data: sectionData })}
+                                    content={SectionViewComponent({
+                                        data: sectionData,
+                                        filters,
+                                        setFilters,
+                                        filterName: sectionName
+                                    })}
                                 />
                             </View>
                         );
                     })}
+                    {/* actions to */}
+                    <View style={[styles.buttons]}>
+                        <Pressable style={[styles.resetButton]} onPress={onReset}>
+                            <Text style={[styles.buttonText, { color: theme.colors.neutral(0.9) }]}>Reset</Text>
+                        </Pressable>
+
+                        <Pressable style={[styles.applyButton]} onPress={onApply}>
+                            <Text style={[styles.buttonText, { color: theme.colors.white }]}>Apply</Text>
+                        </Pressable>
+                    </View>
                 </View>
             </BottomSheetView>
         </BottomSheetModal>
@@ -42,10 +65,10 @@ const FiltersModal = ({ modalRef }) => {
 };
 
 const sections = {
-    order: (props) => <CommonFilterRow {...props} />,
+    order_by: (props) => <CommonFilterRow {...props} />,
     orientation: (props) => <CommonFilterRow {...props} />,
-    type: (props) => <CommonFilterRow {...props} />,
-    colors: (props) => <CommonFilterRow {...props} />,
+    asset_type: (props) => <CommonFilterRow {...props} />,
+    color: (props) => <ColorFilter {...props} />,
 };
 
 
@@ -87,7 +110,7 @@ const styles = StyleSheet.create({
     },
     content: {
         gap: 15,
-        width: '100%',
+        // width: '100%',
         paddingVertical: 10,
         paddingHorizontal: 20,
     },
@@ -97,6 +120,36 @@ const styles = StyleSheet.create({
         color: theme.colors.neutral(0.8),
         marginBottom: 5,
     },
+    buttons: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 40,
+        gap: 10
+    },
+    applyButton: {
+        flex: 1,
+        backgroundColor: theme.colors.neutral(0.8),
+        padding: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: theme.radius.md,
+        borderCurve: "continuous"
+    },
+    resetButton: {
+        flex: 1,
+        backgroundColor: theme.colors.neutral(0.03),
+        padding: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: theme.radius.md,
+        borderCurve: "continuous",
+        borderColor: theme.colors.grayBG,
+        borderWidth: 2,
+    },
+    buttonText: {
+        fontSize: hp(2.2)
+    }
 });
 
 export default FiltersModal;
