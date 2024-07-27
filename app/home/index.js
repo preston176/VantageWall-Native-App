@@ -60,7 +60,21 @@ const HomeScreen = () => {
         modalRef?.current?.close();
     }
     const applyFilters = () => {
-        console.log("applying filters")
+        if (filters) {
+
+            setPage(1);
+            setImages([]);
+            let params = {
+                page, ...filters
+            }
+            if (activeCategory) params.category = activeCategory;
+            if (search) {
+                params.query = search;
+                return;
+            } else params.query = "latest";
+
+            fetchImages(params, false)
+        }
         closeFiltersModal()
 
     }
@@ -68,6 +82,7 @@ const HomeScreen = () => {
     const resetFilters = () => {
         console.log("resestting filters");
         setFilters(null)
+        setIsSearching(false);
         closeFiltersModal()
     }
 

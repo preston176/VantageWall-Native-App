@@ -17,6 +17,7 @@ const ColorFilter = ({ data, filterName, filters, setFilters }) => {
     const onSelect = (item) => {
         setFilters({ ...filters, [filterName]: item })
     }
+    console.log(filters)
     return (
         <View style={styles.flexRowWrap}>
             {
